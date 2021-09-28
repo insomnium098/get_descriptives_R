@@ -1,20 +1,21 @@
 #Environment
-library(readxl)
-getwd()
-setwd("/Users/luis_/OneDrive/Documentos/Holmusk/get_descriptives/")
+#library(readxl)
+#getwd()
+#setwd("/Users/luis_/OneDrive/Documentos/Holmusk/get_descriptives/")
 
 #Load data
-data1 <- read_excel("data1.xlsx", sheet="Sheet1")
-data2 <- read_excel("data2.xlsx", sheet="Sheet1")
-data3 <- read_excel("data3.xlsx", sheet="Sheet1")
-data4 <- read_excel("data4.xlsx", sheet="Sheet1")
+#data1 <- read_excel("data1.xlsx", sheet="Sheet1")
+#data2 <- read_excel("data2.xlsx", sheet="Sheet1")
+#data3 <- read_excel("data3.xlsx", sheet="Sheet1")
+#data4 <- read_excel("data4.xlsx", sheet="Sheet1")
+data4 <- read.csv("data4.csv", row.names = 1)
 
 #Define _get-default_names function
 get_default_names <- function(n){
   #This function returns the default names of the cohort
   cohort_list <- c()
   for (i in 1:n){
-    cohort <- paste("Cohort-", i)
+    cohort <- paste0("Cohort-", i)
     cohort_list<- append(cohort_list, cohort)
   }
   return(cohort_list)
@@ -43,19 +44,28 @@ assign_cohort_name(NULL,5) #Function with NULL cnames
 #Define prepare_dataframe function
 prepare_dataframe <- function(df, colname, cnames){
   #Converts the dataframe to a list of dataframes for each cohort. This functions feed to prepare_dataframe_list
-  list_df <- c()
+  list_df <- list()
+
   if (is.null(colname)){
-    print("Name of the cohort column is not specified. Therefore, the data is assumed to be from a single cohort")
+    warning("Name of the cohort column is not specified. Therefore, the data is assumed to be from a single cohort")
     cohort_names <- assign_cohort_name(cnames, 1)
-    list_df <- c(df)
+    cohort_names <- strsplit(cohort_names, " ")
+    list_df <- (list(df))
   } else {
-    indexColname <- grep(colname, colnames(df))
+    ##We find the column specified,#We need to make a case where the column doesnt exist
+    indexColname <- which(colnames(df) == colname)
     cohort_names <- unique(df[,indexColname])
+    tmp_cohort_name <- list()
+    
     for (i in cohort_names){
       tmp <- df[df[, indexColname] == i,]
-      tmp$indexColname <- NULL
-      append(list_df, tmp)
+      tmp <- tmp[-c(indexColname)]
+      #append(list_df, tmp)
+      list_df <- c(list_df, list(tmp))
+      tmp_cohort_name <- c(tmp_cohort_name, i)
+      
     }
+    cohort_names <- tmp_cohort_name
   }
   return(list(list_df, cohort_names))
 }
