@@ -97,7 +97,6 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   if(length(list_dataframes) == 1){
     finalDF <- as.data.frame(list_dataframes[1])
     if(is.null(cohort_col)){
-      print("i")
       finalDF$COHORT_ASSIGNED<- get_default_names(1)
     }
     
