@@ -1,2 +1,1 @@
-# get_descriptives_R
-get_descriptives for the R version of NeuroBlu
+The function can be runned using the script in arsenal/main.R
