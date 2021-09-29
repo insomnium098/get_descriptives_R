@@ -1,6 +1,7 @@
 library(arsenal)
 
 source("prepare_dataframes.R")
+source("stats_analysis.R")
 get_descriptives <- function(list_dataframes,
                              cohort_col = NULL,
                              cohort_names = NULL,
@@ -24,9 +25,11 @@ get_descriptives <- function(list_dataframes,
   ####Next we prepare the dataframe with the cohorts_names
   df <- prepare_dataframe(df, cohort_names, cohort_col)
   
+  ###Next we run the stats analysis
+  
+  df <- run_arsenal(df, cohort_col)
+  
   return(df)
-  
-  
 }
 
 
@@ -39,7 +42,17 @@ get_descriptives <- function(list_dataframes,
 df1 <- read.csv("data4.csv", row.names = 1)
 df2 <- read.csv("data4.csv", row.names = 1)
 list_test <- list(df1, df2)
-test_df <- get_descriptives(list_test, exclude_cols = c("race", "gender"),
-                            cohort_col = "cohort.label")
 
-test_df_no_cohort <- get_descriptives(list_test, exclude_cols = c("race", "gender"))
+
+
+####The test should be giving warnings in Wilcox.test as we are using the same
+###table duplicated for the analysis
+####Making the result as data.frame
+test_df <- as.data.frame(get_descriptives(list_test, exclude_cols = c("race", "gender"),
+                            cohort_col = "cohort.label"))
+
+###Making the result as summary
+
+summary(get_descriptives(list_test, exclude_cols = c("race", "gender")))
+
+
