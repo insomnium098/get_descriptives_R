@@ -1,12 +1,12 @@
 library(arsenal)
 
 
-run_arsenal <- function(df, cohort_col = NULL, continuous_stat_agg){
+run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg){
 
   
   formula <- get_formula(df, cohort_col)
   
-  cont_agg <- get_continuous_stat_agg(continuous_stat_agg)
+  cont_agg <- get_continous_stat_agg(continous_stat_agg)
   
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
@@ -15,7 +15,7 @@ run_arsenal <- function(df, cohort_col = NULL, continuous_stat_agg){
   
 }
 
-get_continuous_stat_agg <- function(var){
+get_continous_stat_agg <- function(var){
   
   if(var == "both"){
     stat <- c("meansd", "median")

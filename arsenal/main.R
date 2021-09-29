@@ -7,7 +7,7 @@ get_descriptives <- function(list_dataframes,
                              cohort_names = NULL,
                              use_cols = NULL,
                              exclude_cols = NULL,
-                             continuous_stat_agg ="both"){
+                             continous_stat_agg ="both"){
   
   ####Function to obtain descriptIve statistics of a given list of dataframes
   ###INPUT:
@@ -31,7 +31,7 @@ get_descriptives <- function(list_dataframes,
   
   ###Next we run the stats analysis
   
-  df <- run_arsenal(df, cohort_col, continuous_stat_agg)
+  df <- run_arsenal(df, cohort_col, continous_stat_agg)
   
   return(df)
 }
