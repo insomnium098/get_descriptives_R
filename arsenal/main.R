@@ -6,7 +6,8 @@ get_descriptives <- function(list_dataframes,
                              cohort_col = NULL,
                              cohort_names = NULL,
                              use_cols = NULL,
-                             exclude_cols = NULL){
+                             exclude_cols = NULL,
+                             continuous_stat_agg ="both"){
   
   ####Function to obtain descriptIve statistics of a given list of dataframes
   ###INPUT:
@@ -17,6 +18,9 @@ get_descriptives <- function(list_dataframes,
   ###use_cols: character vector indicating the names of the columns to be used
   ###excludecols: character vector indicating the names of the columns to be 
   ###excluded
+  ##continuous_stat_agg: character indicating in the continous variables
+  ##should be summarized with the mean, median(IQR), or both. Possible values:
+  ##"mean", "median", "both"
   
   
   ###We first prepare de dataframe with the use and exclude columns
@@ -27,7 +31,7 @@ get_descriptives <- function(list_dataframes,
   
   ###Next we run the stats analysis
   
-  df <- run_arsenal(df, cohort_col)
+  df <- run_arsenal(df, cohort_col, continuous_stat_agg)
   
   return(df)
 }
