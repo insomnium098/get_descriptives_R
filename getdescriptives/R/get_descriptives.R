@@ -165,10 +165,11 @@ run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
 
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
-                         numeric.stats = cont_agg)
+                         numeric.stats = cont_agg, total = FALSE)
 
 
-  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2, text=TRUE)
+  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2,
+                    dig.p = 2, text=TRUE, pfootnote=TRUE)
 
   return(output)
 
