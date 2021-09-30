@@ -39,7 +39,6 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
 }
 
 
-
 prepare_dataframe_cols <- function(df, usecols = NULL, excludecols = NULL){
   #"""Excludes/Includes required columns in the dataset"""
   if (is.null(usecols)){
@@ -168,7 +167,8 @@ run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
                          numeric.stats = cont_agg)
 
-  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2)
+
+  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2, text=TRUE)
 
   return(output)
 
