@@ -12,7 +12,7 @@ Categorical and ordinal variables with Chi-squared test.
 ### Installation
 
 ```
-devtools::install_github("insomnium098/get_descriptives_R")
+devtools::install_github("insomnium098/get_descriptives_R/getdescriptives")
 ```
 
 ### Example
