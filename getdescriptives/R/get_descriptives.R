@@ -1,7 +1,6 @@
 library(arsenal)
 library(dplyr)
 
-
 iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
                                         exclude_cols = NULL){
   ####The input of the function is:
@@ -11,9 +10,9 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
   ##Returns: a List, where its first element is a list containing the
   ##dataframes prepared (df_proc) and the second element is a list containing the
   ##colnames of the dataframes (des_vars)
-  
+
   #"""Iterates through the data list and calls _prepare_dataframe_cols()."""
-  
+
   ##r variable is a list that contains the dataframes
   ##list_colnames variable is a list that contains the colnames of the dataframes
   r <- list()
@@ -27,7 +26,7 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
   ###r contains the list of dataframes
   #final_list <- list(r, list_colnames)
   return(r)
-  
+
 }
 
 
@@ -76,16 +75,16 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   ##This function receives a list dataframes and rbinds them. If the user
   ##provides the vector cohorts_names with the same length as the list_datarames
   ##the function will add a column indicating the cohort of each dataframe
-  ##If the list_dataframe only conatains a single dataframe and no 
+  ##If the list_dataframe only conatains a single dataframe and no
   ##cohorts_names , the function will add a column with a default cohort name
   ##The column added to the dataframes specifyng the name of the cohort will be
   ##COHORT_ASSIGNED
-  
-  
+
+
   if(class(list_dataframes) == "data.frame"){
     list_dataframes <- list(list_dataframes)
   }
-  
+
   if(is.null(cohorts_names)){
     cohorts_names <- get_default_names(length(list_dataframes))
   }
@@ -99,14 +98,14 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
     if(is.null(cohort_col)){
       finalDF$COHORT_ASSIGNED<- get_default_names(1)
     }
-    
+
   } else {
     for(i_df in 1:length(list_dataframes)){
       tmp_df <- as.data.frame(list_dataframes[i_df])
       if(is.null(cohort_col)){
         tmp_df$COHORT_ASSIGNED<- cohorts_names[i_df]
       }
-      
+
       if(!exists("finalDF")){
         finalDF <- tmp_df
       } else{
@@ -114,25 +113,87 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
       }
     }
   }
-  
+
   return(finalDF)
-  
-  
-  
+
+
+
+}
+
+run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg){
+
+
+  formula <- get_formula(df, cohort_col)
+
+  cont_agg <- get_continous_stat_agg(continous_stat_agg)
+
+  ##WT stands for Wilcoxon-test(alias Mann-Whitney)
+  tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
+                         numeric.stats = cont_agg)
+  return(tab_results)
+
+}
+
+get_continous_stat_agg <- function(var){
+
+  if(var == "both"){
+    stat <- c("meansd", "median")
+    return(stat)
+  } else if (var == "mean") {
+    return("meansd")
+  } else {
+    return(var)
+  }
+}
+
+get_formula <- function(df,cohort_col = NULL ){
+
+  if(is.null(cohort_col) && (length(which(colnames(df) == "COHORT_ASSIGNED")) == 0)){
+    formula <- formulize("",".")
+  } else if((length(which(colnames(df) == "COHORT_ASSIGNED")) != 0)) {
+    formula <-formulize("COHORT_ASSIGNED",".")
+  } else {
+    ## The formulize function does the paste and as.formula steps
+    formula <- formulize(cohort_col,".")
+  }
+  return(formula)
+
 }
 
 
+get_descriptives <- function(list_dataframes,
+                             cohort_col = NULL,
+                             cohort_names = NULL,
+                             use_cols = NULL,
+                             exclude_cols = NULL,
+                             continous_stat_agg ="both"){
 
-#############TESTING############
-###############################
-#df1 <- read.csv("data4.csv", row.names = 1)
-#df2 <- read.csv("data4.csv", row.names = 1)
+  ####Function to obtain descriptIve statistics of a given list of dataframes
+  ###INPUT:
+  ###list_dataframes: a single dataframe or a list of dataframes
+  ###cohort_col: character vector indicating the colname of list_dataframes to
+  ###be used for cohort assignment
+  ###cohort_names: character vector indicating the names of the cohorts
+  ###use_cols: character vector indicating the names of the columns to be used
+  ###excludecols: character vector indicating the names of the columns to be
+  ###excluded
+  ##continuous_stat_agg: character indicating in the continous variables
+  ##should be summarized with the mean, median(IQR), or both. Possible values:
+  ##"mean", "median", "both"
 
 
-#list_test <- list(df1, df2)
-#list_test <- list(df1)
+  ###We first prepare de dataframe with the use and exclude columns
+  df <- iter_prepare_dataframe_cols(list_dataframes,use_cols, exclude_cols)
 
-#test <- prepare_dataframe(df1)
+  ####Next we prepare the dataframe with the cohorts_names
+  df <- prepare_dataframe(df, cohort_names, cohort_col)
+
+  ###Next we run the stats analysis
+
+  df <- run_arsenal(df, cohort_col, continous_stat_agg)
+
+  return(df)
+}
 
 
 
