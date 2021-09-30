@@ -229,4 +229,3 @@ get_descriptives <- function(list_dataframes,
 
   return(df)
 }
-
