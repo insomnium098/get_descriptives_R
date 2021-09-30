@@ -1,5 +1,6 @@
 library(arsenal)
 library(dplyr)
+library(naniar)
 
 iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
                                         exclude_cols = NULL){
@@ -115,22 +116,52 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   }
 
   return(finalDF)
-
-
-
 }
 
-run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg){
+#Define nan_policy function
+nan_policy<-function(df, nan_decision){
+
+  #Write out all the strings associated with missing values
+  na_strings <- c("NA", "N A", "N / A", "N/A", "N/ A", "Not Available",
+                  "NOt available", "UNKNOWN", "Unknown")
+
+  #Replace all na_strings for NAs
+  df <- as.data.frame(replace_with_na_all(data=df, condition = ~.x %in%
+                                            c("NA", "N A", "N / A", "N/A",
+                                              "N/ A", "Not Available",
+                                              "NOt available", "UNKNOWN",
+                                              "Unknown")))
+
+  #Make decision on what to do with missing values
+  if (nan_decision == 'keep'){
+    df <- df
+  } else {
+    print("Dropping all rows that contain missing values")
+    df <- na.omit(df)
+    df
+  }
+  return(df)
+}
+
+
+run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
+                        dig){
 
 
   formula <- get_formula(df, cohort_col)
 
   cont_agg <- get_continous_stat_agg(continous_stat_agg)
 
+  #Make decision on what to do with missing values
+  df <- nan_policy(df, nan_decision)
+
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
                          numeric.stats = cont_agg)
-  return(tab_results)
+
+  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2)
+
+  return(output)
 
 }
 
@@ -166,7 +197,9 @@ get_descriptives <- function(list_dataframes,
                              cohort_names = NULL,
                              use_cols = NULL,
                              exclude_cols = NULL,
-                             continous_stat_agg ="both"){
+                             continous_stat_agg ="both",
+                             nan_decision = "keep",
+                             dig = 2){
 
   ####Function to obtain descriptIve statistics of a given list of dataframes
   ###INPUT:
@@ -180,6 +213,9 @@ get_descriptives <- function(list_dataframes,
   ##continuous_stat_agg: character indicating in the continous variables
   ##should be summarized with the mean, median(IQR), or both. Possible values:
   ##"mean", "median", "both"
+  ###nan_decision: String indicating if the user wants to keep NAs or drop them,
+  ##Possible values: "keep". Any other string besides from keep will drop NAs
+  ###dig: Integer indicating the number of decimal places to be shown.
 
 
   ###We first prepare de dataframe with the use and exclude columns
@@ -190,15 +226,8 @@ get_descriptives <- function(list_dataframes,
 
   ###Next we run the stats analysis
 
-  df <- run_arsenal(df, cohort_col, continous_stat_agg)
+  df <- run_arsenal(df, cohort_col, continous_stat_agg, nan_decision, dig)
 
   return(df)
 }
-
-
-#Check
-
-
-
-
 
