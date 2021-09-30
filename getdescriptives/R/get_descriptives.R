@@ -18,12 +18,20 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
   ##list_colnames variable is a list that contains the colnames of the dataframes
   r <- list()
   list_colnames <- list()
-  for (i in 1:length(df_list)){
-    df_i <- as.data.frame(df_list[i])
-    df_prepared <- prepare_dataframe_cols(df_i,use_cols, exclude_cols)
-    r <- c(list(df_prepared), r)
-    #list_colnames <- c(list(colnames(df_prepared)), list_colnames)
+
+  ##Case when its a single dataframe
+  if(class(df_list) == "data.frame"){
+    r <- prepare_dataframe_cols(df_list,use_cols, exclude_cols)
+  } else {
+    for (i in 1:length(df_list)){
+      df_i <- as.data.frame(df_list[i])
+      df_prepared <- prepare_dataframe_cols(df_i,use_cols, exclude_cols)
+      r <- c(list(df_prepared), r)
+      #list_colnames <- c(list(colnames(df_prepared)), list_colnames)
+    }
+
   }
+
   ###r contains the list of dataframes
   #final_list <- list(r, list_colnames)
   return(r)
@@ -159,7 +167,7 @@ run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
                          numeric.stats = cont_agg)
 
-  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2)
+  output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2, dig.p = 2, text=TRUE)
 
   return(output)
 
