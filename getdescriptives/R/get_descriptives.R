@@ -68,17 +68,6 @@ get_default_names <- function(n){
   return(cohort_list)
 }
 
-#Define assign_cohort_name function
-assign_cohort_name <- function(cnames, n){
-  #Assign cohort names if they are not specified
-  if (is.null(cnames)){
-    cohort_names <- get_default_names(n)
-  } else {
-    cohort_names <- cnames
-  }
-  return(cohort_names)
-}
-
 prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
                               cohort_col = NULL){
   ##This function receives a list dataframes and rbinds them. If the user
