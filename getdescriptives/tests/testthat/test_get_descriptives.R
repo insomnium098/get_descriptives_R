@@ -39,6 +39,18 @@ test_that("Single dataframe with cohort_col", {
   expect_identical(var_expected, var_output)
 })
 
+test_that("Single dataframe with cohort_col and > 2 cohort groups", {
+
+  var_output <- get_descriptives(PlantGrowth, cohort_col = "group")
+  var_expected <- summary(tableby(group~., data = PlantGrowth,
+                                  cat.test = "chisq",
+                                  numeric.stats = c("meansd", "median"), total = FALSE,
+                                  cat.stats=c("countpct")), digits = 2,
+                          dig.count = 2, dig.pct = 2,
+                          dig.p = 2, text=TRUE,
+                          pfootnote=TRUE)
+  expect_identical(var_expected, var_output)
+})
 
 test_that("Two dataframes with cohort_col", {
   plants <- filter(PlantGrowth, group %in% c("trt1", "trt2"))

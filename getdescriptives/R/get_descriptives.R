@@ -151,8 +151,12 @@ run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, dig){
   #Make decision on what to do with missing values
   #df <- nan_policy(df, nan_decision)
 
+  ###Check the number of groups. If < 2 then Wilcox-test is used for
+  ###numerical variables, else anova is used
+  numeric_test <- get_numeric_test(df, cohort_col, continous_stat_agg)
+
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
-  tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
+  tab_results <- tableby(formula,data=df, numeric.test = numeric_test, cat.test = "chisq",
                          numeric.stats = cont_agg, total = FALSE,
                          cat.stats=c("countpct"))
 
@@ -187,6 +191,28 @@ get_formula <- function(df,cohort_col = NULL ){
     formula <- formulize(cohort_col,".")
   }
   return(formula)
+
+}
+
+get_numeric_test <- function(df, cohort_col, continous_stat_agg){
+
+  if(is.null(cohort_col)){
+    if(length(which(colnames(df) == "COHORT_ASSIGNED")) > 2){
+      return("anova")
+    } else{
+      return("wt")
+    }
+  } else{
+    indexCohortCol <- which(colnames(df) == cohort_col)
+    if(length(unique(df[,indexCohortCol])) > 2){
+      return("anova")
+    } else{
+      return("wt")
+    }
+
+  }
+
+
 
 }
 
