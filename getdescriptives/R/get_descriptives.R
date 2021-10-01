@@ -94,7 +94,7 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   if(length(list_dataframes) == 1){
     finalDF <- as.data.frame(list_dataframes[1])
     if(is.null(cohort_col)){
-      finalDF$COHORT_ASSIGNED<- get_default_names(1)
+      #finalDF$COHORT_ASSIGNED<- get_default_names(1)
     }
 
   } else {
@@ -150,11 +150,12 @@ run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
   cont_agg <- get_continous_stat_agg(continous_stat_agg)
 
   #Make decision on what to do with missing values
-  df <- nan_policy(df, nan_decision)
+  #df <- nan_policy(df, nan_decision)
 
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
   tab_results <- tableby(formula,data=df, numeric.test = "wt", cat.test = "chisq",
-                         numeric.stats = cont_agg, total = FALSE)
+                         numeric.stats = cont_agg, total = FALSE,
+                         cat.stats=c("countpct"))
 
 
   output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2,
