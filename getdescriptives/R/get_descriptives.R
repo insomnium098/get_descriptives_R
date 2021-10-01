@@ -141,8 +141,7 @@ nan_policy<-function(df, nan_decision){
 }
 
 
-run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, nan_decision,
-                        dig){
+run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, dig){
 
 
   formula <- get_formula(df, cohort_col)
@@ -198,7 +197,6 @@ get_descriptives <- function(list_dataframes,
                              use_cols = NULL,
                              exclude_cols = NULL,
                              continous_stat_agg ="both",
-                             nan_decision = "keep",
                              dig = 2){
 
   ####Function to obtain descriptIve statistics of a given list of dataframes
@@ -226,7 +224,7 @@ get_descriptives <- function(list_dataframes,
 
   ###Next we run the stats analysis
 
-  df <- run_arsenal(df, cohort_col, continous_stat_agg, nan_decision, dig)
+  df <- run_arsenal(df, cohort_col, continous_stat_agg, dig)
 
   return(df)
 }
