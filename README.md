@@ -78,11 +78,11 @@ get_descriptives(PlantGrowth)
 |-  trt1      |   10 (33.3%)   |
 |-  trt2      |   10 (33.3%)   |
 ```
-
+#### Single cohort, > 2 groups
 ```
 get_descriptives(PlantGrowth, cohort_col = "group")
 ```
-#### Single cohort, > 2 groups
+
 ```
 |             | ctrl (N=10) | trt1 (N=10) | trt2 (N=10) |   p value|
 |:------------|:-----------:|:-----------:|:-----------:|---------:|
