@@ -79,7 +79,18 @@ get_descriptives(PlantGrowth)
 |-  trt2      |   10 (33.3%)   |
 ```
 
-
+```
+get_descriptives(PlantGrowth, cohort_col = "group")
+```
+#### Single cohort, > 2 groups
+```
+|             | ctrl (N=10) | trt1 (N=10) | trt2 (N=10) |   p value|
+|:------------|:-----------:|:-----------:|:-----------:|---------:|
+|weight       |             |             |             | 0.016 (1)|
+|-  Mean (SD) | 5.03 (0.58) | 4.66 (0.79) | 5.53 (0.44) |          |
+|-  Median    |    5.15     |    4.55     |    5.44     |          |
+1. Linear Model ANOVA
+```
 
 #### Two cohorts
 
