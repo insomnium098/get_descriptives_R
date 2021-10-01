@@ -62,6 +62,25 @@ get_descriptives(mtcars)
 |-  Median    |      2.00       |
 ```
 
+```
+data("PlantGrowth")
+get_descriptives(PlantGrowth)
+```
+
+```
+|             | Overall (N=30) |
+|:------------|:--------------:|
+|weight       |                |
+|-  Mean (SD) |  5.07 (0.70)   |
+|-  Median    |      5.15      |
+|group        |                |
+|-  ctrl      |   10 (33.3%)   |
+|-  trt1      |   10 (33.3%)   |
+|-  trt2      |   10 (33.3%)   |
+```
+
+
+
 #### Two cohorts
 
 
@@ -105,4 +124,22 @@ get_descriptives(list(list(mtcars[1:10,]), mtcars[11:20,]))
 |-  Mean (SD) |   2.90 (1.20)   |   2.50 (1.35)   |          |
 |-  Median    |      3.00       |      2.00       |          |
 1. Wilcoxon rank sum test
+```
+
+```
+get_descriptives(list(list(PlantGrowth), PlantGrowth), cohort_names = c("plant1", "plant2"))
+```
+
+```
+|             | plant1 (N=30) | plant2 (N=30) |   p value|
+|:------------|:-------------:|:-------------:|---------:|
+|weight       |               |               | 1.000 (1)|
+|-  Mean (SD) |  5.07 (0.70)  |  5.07 (0.70)  |          |
+|-  Median    |     5.15      |     5.15      |          |
+|group        |               |               | 1.000 (2)|
+|-  ctrl      |  10 (33.3%)   |  10 (33.3%)   |          |
+|-  trt1      |  10 (33.3%)   |  10 (33.3%)   |          |
+|-  trt2      |  10 (33.3%)   |  10 (33.3%)   |          |
+1. Wilcoxon rank sum test
+2. Pearson's Chi-squared test
 ```
