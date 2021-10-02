@@ -198,7 +198,8 @@ get_formula <- function(df_var,cohort_col = NULL ){
 get_numeric_test <- function(df_var, cohort_col, continous_stat_agg){
 
   if(is.null(cohort_col)){
-    if(length(which(colnames(df_var) == "COHORT_ASSIGNED")) > 2){
+    indexCohortCol <- which(colnames(df_var) == "COHORT_ASSIGNED")
+    if(length(unique(df_var[,indexCohortCol])) > 2){
       return("anova")
     } else{
       return("wt")
