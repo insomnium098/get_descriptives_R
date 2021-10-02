@@ -100,3 +100,8 @@ test_that("Two dataframes with numerical variables, cohort names defined", {
                           pfootnote=TRUE)
   expect_identical(var_expected, var_output)
 })
+
+test_that("Check_input single dataframe", {
+  expect_identical(check_input(PlantGrowth), PlantGrowth)
+})
+
