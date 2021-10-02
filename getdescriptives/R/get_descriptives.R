@@ -268,7 +268,7 @@ parse_demographic_list <- function(user_input){
   final_list <- list()
   for (x in user_input){
     df_demo <- demographics_df(x)
-    final_list <- append(final_list, df_demo)
+    final_list  <- c(list(df_demo), final_list)
   }
 
   return(final_list)
