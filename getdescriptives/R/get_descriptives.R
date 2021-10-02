@@ -1,6 +1,7 @@
 library(arsenal)
 library(dplyr)
 library(naniar)
+library(NeuroBlu)
 
 iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
                                         exclude_cols = NULL){
@@ -211,9 +212,66 @@ get_numeric_test <- function(df, cohort_col, continous_stat_agg){
     }
 
   }
+}
 
+demographics_df <- function(cohort){
+  #This function takes in a cohort name and gets the corresponding patient IDs to extract
+  ##demographic variables and returns a dataframe ready to use un get_descriptives()
 
+  #Extract demographic variables
+  birth_year = getBirthYear(cohort) #Birth year
+  gender = getGender(cohort) #Gender
+  city = getCity(cohort) #City
+  education_years = getEducationYears(cohort) #Education years
+  employment = getEmployment(cohort) #Employment
+  ethnicity = getEthnicity(cohort) #Ethnicity
+  marital = getMarital(cohort) #Marital status
+  race = getRace(cohort) #Race
+  state = getState(cohort) #State
 
+  #List of variables to merge
+  demographics <- list(birth_year, gender, city, education_years, employment, ethnicity,
+                       marital, race, state)
+
+  #Merge all remaining variables
+  for (i in demographics){
+    i <- as.data.frame(i) #Change lists to dataframes
+    if(!(exists("df_final"))){
+      df_final<-i
+    } else {
+      df_final<-merge(df_final, i, by="person_id", all=TRUE)
+    }
+  }
+  df_final <- df_final[,-c(1)] #Remove column 'person_id', which is the first in the dataframe
+  return(df_final)
+}
+
+check_input <- function(user_input){
+  ##Function that verifies if the input is an
+  ##integer, list of integers or dataframe
+  ###If the input is integer or list of integer
+  ###it will parse them to obtain the demographics dataframe
+  if(class(user_input) == "numeric"){
+    return(demographics_df(user_iput))
+  } else if (class(user_input) == "data.frame"){
+    return(user_input)
+  } else if (class(user_input[[1]]) == "numeric"){
+    return(parse_demographic_list(user_input))
+  } else {
+    return(user_input)
+  }
+}
+
+parse_demographic_list <- function(user_input){
+  ###Function that receives a list of integers (person_id)
+  ###Making a Dataframe of demographics for each of them
+  final_list <- list()
+  for (x in user_input){
+    df_demo <- demographics_df(x)
+    final_list <- append(final_list, df_demo)
+  }
+
+  return(final_list)
 }
 
 
@@ -241,8 +299,11 @@ get_descriptives <- function(list_dataframes,
   ##Possible values: "keep". Any other string besides from keep will drop NAs
   ###dig: Integer indicating the number of decimal places to be shown.
 
+  ##We first check if the user provided ids of patients or a dataframe
+  df <- check_input(list_dataframes)
 
-  ###We first prepare de dataframe with the use and exclude columns
+
+  ###Next we prepare de dataframe with the use and exclude columns
   df <- iter_prepare_dataframe_cols(list_dataframes,use_cols, exclude_cols)
 
   ####Next we prepare the dataframe with the cohorts_names
