@@ -252,7 +252,7 @@ check_input <- function(user_input){
   ###If the input is integer or list of integer
   ###it will parse them to obtain the demographics dataframe
   if(class(user_input) == "numeric"){
-    return(demographics_df(user_iput))
+    return(demographics_df(user_input))
   } else if (class(user_input) == "data.frame"){
     return(user_input)
   } else if (class(user_input[[1]]) == "numeric"){
