@@ -304,7 +304,7 @@ get_descriptives <- function(list_dataframes,
 
 
   ###Next we prepare de dataframe with the use and exclude columns
-  df_var <- iter_prepare_dataframe_cols(list_dataframes,use_cols, exclude_cols)
+  df_var <- iter_prepare_dataframe_cols(df_var,use_cols, exclude_cols)
 
   ####Next we prepare the dataframe with the cohorts_names
   df_var <- prepare_dataframe(df_var, cohort_names, cohort_col)
