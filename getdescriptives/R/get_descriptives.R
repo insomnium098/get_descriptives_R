@@ -40,16 +40,16 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
 }
 
 
-prepare_dataframe_cols <- function(df, usecols = NULL, excludecols = NULL){
+prepare_dataframe_cols <- function(df_var, usecols = NULL, excludecols = NULL){
   #"""Excludes/Includes required columns in the dataset"""
   if (is.null(usecols)){
     if(is.null(excludecols)){
-      return(df)
+      return(df_var)
     } else {
-      return(df[, !(colnames(df) %in% excludecols)])
+      return(df_var[, !(colnames(df_var) %in% excludecols)])
     }
   } else if (is.null(excludecols)){
-    return(df[, (colnames(df) %in% usecols)])
+    return(df_var[, (colnames(df_var) %in% usecols)])
   } else {
     stop("ValueError: Both use_cols and exclude_cols cannot take values")
   }
@@ -117,14 +117,14 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
 }
 
 #Define nan_policy function
-nan_policy<-function(df, nan_decision){
+nan_policy<-function(df_var, nan_decision){
 
   #Write out all the strings associated with missing values
   na_strings <- c("NA", "N A", "N / A", "N/A", "N/ A", "Not Available",
                   "NOt available", "UNKNOWN", "Unknown")
 
   #Replace all na_strings for NAs
-  df <- as.data.frame(replace_with_na_all(data=df, condition = ~.x %in%
+  df_var <- as.data.frame(replace_with_na_all(data=df_var, condition = ~.x %in%
                                             c("NA", "N A", "N / A", "N/A",
                                               "N/ A", "Not Available",
                                               "NOt available", "UNKNOWN",
@@ -132,32 +132,32 @@ nan_policy<-function(df, nan_decision){
 
   #Make decision on what to do with missing values
   if (nan_decision == 'keep'){
-    df <- df
+    df_var <- df_var
   } else {
     print("Dropping all rows that contain missing values")
-    df <- na.omit(df)
-    df
+    df_var <- na.omit(df_var)
+    df_var
   }
-  return(df)
+  return(df_var)
 }
 
 
-run_arsenal <- function(df, cohort_col = NULL, continous_stat_agg, dig){
+run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
 
 
-  formula <- get_formula(df, cohort_col)
+  formula <- get_formula(df_var, cohort_col)
 
   cont_agg <- get_continous_stat_agg(continous_stat_agg)
 
   #Make decision on what to do with missing values
-  #df <- nan_policy(df, nan_decision)
+  #df_var <- nan_policy(df_var, nan_decision)
 
   ###Check the number of groups. If < 2 then Wilcox-test is used for
   ###numerical variables, else anova is used
-  numeric_test <- get_numeric_test(df, cohort_col, continous_stat_agg)
+  numeric_test <- get_numeric_test(df_var, cohort_col, continous_stat_agg)
 
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
-  tab_results <- tableby(formula,data=df, numeric.test = numeric_test, cat.test = "chisq",
+  tab_results <- tableby(formula,data=df_var, numeric.test = numeric_test, cat.test = "chisq",
                          numeric.stats = cont_agg, total = FALSE,
                          cat.stats=c("countpct"))
 
@@ -181,11 +181,11 @@ get_continous_stat_agg <- function(var){
   }
 }
 
-get_formula <- function(df,cohort_col = NULL ){
+get_formula <- function(df_var,cohort_col = NULL ){
 
-  if(is.null(cohort_col) && (length(which(colnames(df) == "COHORT_ASSIGNED")) == 0)){
+  if(is.null(cohort_col) && (length(which(colnames(df_var) == "COHORT_ASSIGNED")) == 0)){
     formula <- formulize("",".")
-  } else if((length(which(colnames(df) == "COHORT_ASSIGNED")) != 0)) {
+  } else if((length(which(colnames(df_var) == "COHORT_ASSIGNED")) != 0)) {
     formula <-formulize("COHORT_ASSIGNED",".")
   } else {
     ## The formulize function does the paste and as.formula steps
@@ -195,17 +195,17 @@ get_formula <- function(df,cohort_col = NULL ){
 
 }
 
-get_numeric_test <- function(df, cohort_col, continous_stat_agg){
+get_numeric_test <- function(df_var, cohort_col, continous_stat_agg){
 
   if(is.null(cohort_col)){
-    if(length(which(colnames(df) == "COHORT_ASSIGNED")) > 2){
+    if(length(which(colnames(df_var) == "COHORT_ASSIGNED")) > 2){
       return("anova")
     } else{
       return("wt")
     }
   } else{
-    indexCohortCol <- which(colnames(df) == cohort_col)
-    if(length(unique(df[,indexCohortCol])) > 2){
+    indexCohortCol <- which(colnames(df_var) == cohort_col)
+    if(length(unique(df_var[,indexCohortCol])) > 2){
       return("anova")
     } else{
       return("wt")
@@ -300,18 +300,18 @@ get_descriptives <- function(list_dataframes,
   ###dig: Integer indicating the number of decimal places to be shown.
 
   ##We first check if the user provided ids of patients or a dataframe
-  df <- check_input(list_dataframes)
+  df_var <- check_input(list_dataframes)
 
 
   ###Next we prepare de dataframe with the use and exclude columns
-  df <- iter_prepare_dataframe_cols(list_dataframes,use_cols, exclude_cols)
+  df_var <- iter_prepare_dataframe_cols(list_dataframes,use_cols, exclude_cols)
 
   ####Next we prepare the dataframe with the cohorts_names
-  df <- prepare_dataframe(df, cohort_names, cohort_col)
+  df_var <- prepare_dataframe(df_var, cohort_names, cohort_col)
 
   ###Next we run the stats analysis
 
-  df <- run_arsenal(df, cohort_col, continous_stat_agg, dig)
+  df_var <- run_arsenal(df_var, cohort_col, continous_stat_agg, dig)
 
-  return(df)
+  return(df_var)
 }
