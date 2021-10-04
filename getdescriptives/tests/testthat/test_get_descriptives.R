@@ -1,6 +1,12 @@
 library(dplyr)
 data("PlantGrowth")
 
+##Function to export as csv
+
+export_csv <- function(df){
+  return(write.csv(as.data.frame(df), row.names=F))
+}
+
 test_that("Single dataframe with numerical variables", {
   var_output <- get_descriptives(mtcars)
   var_expected <- summary(tableby(~., data = mtcars,numeric.test = "wt",
@@ -10,7 +16,7 @@ test_that("Single dataframe with numerical variables", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Single dataframe with both numerical and categorical variables", {
@@ -22,7 +28,7 @@ test_that("Single dataframe with both numerical and categorical variables", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 
@@ -36,7 +42,7 @@ test_that("Single dataframe with cohort_col", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Single dataframe with cohort_col and > 2 cohort groups", {
@@ -49,7 +55,7 @@ test_that("Single dataframe with cohort_col and > 2 cohort groups", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Two dataframes with cohort_col", {
@@ -62,7 +68,7 @@ test_that("Two dataframes with cohort_col", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Two dataframes with numerical variables, no cohort names", {
@@ -80,7 +86,7 @@ test_that("Two dataframes with numerical variables, no cohort names", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Two dataframes with numerical variables, cohort names defined", {
@@ -98,7 +104,7 @@ test_that("Two dataframes with numerical variables, cohort names defined", {
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
-  expect_identical(var_expected, var_output)
+  expect_identical(export_csv(var_expected), var_output)
 })
 
 test_that("Check_input single dataframe", {
