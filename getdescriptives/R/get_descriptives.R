@@ -318,7 +318,7 @@ get_descriptives <- function(list_dataframes,
 
   df_var_df <- as.data.frame(df_var)
 
-  df_var_csv_file <- write.csv(df_var_df, 'Variables_Summary.csv', row.names=F)
+  df_var_csv_file <- write.csv(df_var_df, row.names=F)
 
   return(df_var_csv_file)
 }
