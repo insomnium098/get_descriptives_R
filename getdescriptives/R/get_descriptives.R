@@ -171,8 +171,8 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
 
 get_continous_stat_agg <- function(var){
 
-  if(var == "both"){
-    stat <- c("meansd", "median")
+  if(var == "all"){
+    stat <- c("meansd", "median", "iqr")
     return(stat)
   } else if (var == "mean") {
     return("meansd")
@@ -217,7 +217,7 @@ get_numeric_test <- function(df_var, cohort_col, continous_stat_agg){
 
 demographics_df <- function(cohort){
   #This function takes in a cohort name and gets the corresponding patient IDs to extract
-  ##demographic variables and returns a dataframe ready to use un get_descriptives()
+  ##demographic variables and returns a dataframe ready to use in get_descriptives()
 
   #Extract demographic variables
   birth_year = getBirthYear(cohort) #Birth year
@@ -281,7 +281,7 @@ get_descriptives <- function(list_dataframes,
                              cohort_names = NULL,
                              use_cols = NULL,
                              exclude_cols = NULL,
-                             continous_stat_agg ="both",
+                             continous_stat_agg ="all",
                              dig = 2){
 
   ####Function to obtain descriptIve statistics of a given list of dataframes
@@ -314,5 +314,11 @@ get_descriptives <- function(list_dataframes,
 
   df_var <- run_arsenal(df_var, cohort_col, continous_stat_agg, dig)
 
-  return(df_var)
+  ###We now format df_var to export it as csv file
+
+  df_var_df <- as.data.frame(df_var)
+
+  df_var_csv_file <- write.csv(df_var_df, 'Variables_Summary.csv', row.names=F)
+
+  return(df_var_csv_file)
 }
