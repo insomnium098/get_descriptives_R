@@ -282,7 +282,8 @@ get_descriptives <- function(list_dataframes,
                              use_cols = NULL,
                              exclude_cols = NULL,
                              continous_stat_agg ="all",
-                             dig = 2){
+                             dig = 2,
+                             csv = F){
 
   ####Function to obtain descriptIve statistics of a given list of dataframes
   ###INPUT:
@@ -299,6 +300,8 @@ get_descriptives <- function(list_dataframes,
   ###nan_decision: String indicating if the user wants to keep NAs or drop them,
   ##Possible values: "keep". Any other string besides from keep will drop NAs
   ###dig: Integer indicating the number of decimal places to be shown.
+  ##csv: Boolean, indicating if the output should be a CSV. By default
+  ##the output is in Markdown
 
   ##We first check if the user provided ids of patients or a dataframe
   df_var <- check_input(list_dataframes)
@@ -314,11 +317,13 @@ get_descriptives <- function(list_dataframes,
 
   df_var <- run_arsenal(df_var, cohort_col, continous_stat_agg, dig)
 
-  ###We now format df_var to export it as csv file
+  if( csv == T){
+    ###We now format df_var to export it as csv file
+    df_var <- as.data.frame(df_var)
+    df_var <- write.csv(df_var, row.names=F)
+  }
 
-  df_var_df <- as.data.frame(df_var)
 
-  df_var_csv_file <- write.csv(df_var_df, row.names=F)
 
-  return(df_var_csv_file)
+  return(df_var)
 }
