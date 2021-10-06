@@ -87,6 +87,11 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   if(is.null(cohorts_names)){
     cohorts_names <- get_default_names(length(list_dataframes))
   }
+  if(is.null(cohort_col)){
+    warning("UserWarning: Name of the cohort column is not specified.
+            The data is assumed to be from a single cohort",
+            call. = F)
+  }
   if((length(list_dataframes) != length(cohorts_names)) &&
      !is.null(cohorts_names) && !is.null(cohort_col)){
     stop("The number of dataframes is different")
