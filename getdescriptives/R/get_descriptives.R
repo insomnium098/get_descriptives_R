@@ -94,8 +94,12 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   #We first check if there is a single dataframe
   if(length(list_dataframes) == 1){
     finalDF <- as.data.frame(list_dataframes[1])
-    if(is.null(cohort_col)){
-      #finalDF$COHORT_ASSIGNED<- get_default_names(1)
+    if(!is.null(cohorts_names) && is.null(cohort_col)){
+      if (length(cohorts_names) > 1){
+        finalDF$COHORT_ASSIGNED <- cohorts_names[1]
+      } else {
+        finalDF$COHORT_ASSIGNED <- cohorts_names
+      }
     }
 
   } else {
