@@ -113,7 +113,7 @@ environment(medianIQR) <- asNamespace('arsenal')
   if(is.null(cohorts_names)){
     cohorts_names <- .get_default_names(length(list_dataframes))
   }
-  if(is.null(cohort_col)){
+  if(is.null(cohort_col) && length(list_dataframes) == 1){
     warning("UserWarning: Name of the cohort column is not specified.
             The data is assumed to be from a single cohort",
             call. = F)
