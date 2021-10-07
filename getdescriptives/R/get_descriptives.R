@@ -366,6 +366,7 @@ environment(medianIQR) <- asNamespace('arsenal')
 #' @examples
 #' get_descriptives(mtcars)
 #' get_descriptives(list(list(mtcars[1:10,]), mtcars[11:20,]))
+#' @export
 
 get_descriptives <- function(list_dataframes,
                              cohort_col = NULL,
