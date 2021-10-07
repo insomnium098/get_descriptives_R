@@ -123,6 +123,6 @@ test_that("Two dataframes with numerical variables, cohort names defined", {
 })
 
 test_that("Check_input single dataframe", {
-  expect_identical(check_input(PlantGrowth), PlantGrowth)
+  expect_identical(.check_input(PlantGrowth), PlantGrowth)
 })
 

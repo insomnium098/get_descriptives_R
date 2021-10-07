@@ -29,7 +29,7 @@ environment(medianIQR) <- asNamespace('arsenal')
 
 # ---------------------------------#
 
-iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
+.iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
                                         exclude_cols = NULL){
   ####The input of the function is:
   ##df_list : A list of dataframes
@@ -48,11 +48,11 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
 
   ##Case when its a single dataframe
   if(class(df_list) == "data.frame"){
-    r <- prepare_dataframe_cols(df_list,use_cols, exclude_cols)
+    r <- .prepare_dataframe_cols(df_list,use_cols, exclude_cols)
   } else {
     for (i in 1:length(df_list)){
       df_i <- as.data.frame(df_list[i])
-      df_prepared <- prepare_dataframe_cols(df_i,use_cols, exclude_cols)
+      df_prepared <- .prepare_dataframe_cols(df_i,use_cols, exclude_cols)
       r <- c(list(df_prepared), r)
       #list_colnames <- c(list(colnames(df_prepared)), list_colnames)
     }
@@ -66,7 +66,7 @@ iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
 }
 
 
-prepare_dataframe_cols <- function(df_var, usecols = NULL, excludecols = NULL){
+.prepare_dataframe_cols <- function(df_var, usecols = NULL, excludecols = NULL){
   #"""Excludes/Includes required columns in the dataset"""
   if (is.null(usecols)){
     if(is.null(excludecols)){
@@ -85,7 +85,7 @@ prepare_dataframe_cols <- function(df_var, usecols = NULL, excludecols = NULL){
 #####
 
 #Define _get-default_names function
-get_default_names <- function(n){
+.get_default_names <- function(n){
   #This function returns the default names of the cohort
   cohort_list <- c()
   for (i in 1:n){
@@ -95,7 +95,7 @@ get_default_names <- function(n){
   return(cohort_list)
 }
 
-prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
+.prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
                               cohort_col = NULL){
   ##This function receives a list dataframes and rbinds them. If the user
   ##provides the vector cohorts_names with the same length as the list_datarames
@@ -111,7 +111,7 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   }
 
   if(is.null(cohorts_names)){
-    cohorts_names <- get_default_names(length(list_dataframes))
+    cohorts_names <- .get_default_names(length(list_dataframes))
   }
   if(is.null(cohort_col)){
     warning("UserWarning: Name of the cohort column is not specified.
@@ -151,8 +151,8 @@ prepare_dataframe <- function(list_dataframes,cohorts_names = NULL,
   return(finalDF)
 }
 
-#Define nan_policy function
-nan_policy<-function(df_var, nan_decision){
+#Define .nan_policy function
+.nan_policy<-function(df_var, nan_decision){
 
   #Write out all the strings associated with missing values
   na_strings <- c("NA", "N A", "N / A", "N/A", "N/ A", "Not Available",
@@ -177,25 +177,29 @@ nan_policy<-function(df_var, nan_decision){
 }
 
 
-run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
+.run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig,
+                         continous_test, categorical_test){
 
 
-  formula <- get_formula(df_var, cohort_col)
+  formula <- .get_formula(df_var, cohort_col)
 
-  cont_agg <- get_continous_stat_agg(continous_stat_agg)
+  cont_agg <- .get_continous_stat_agg(continous_stat_agg)
 
   ##Obtain the labels of the stats
-  stats_labels <- get_stats_labels(cont_agg)
+  stats_labels <- .get_stats_labels(cont_agg)
 
   #Make decision on what to do with missing values
-  #df_var <- nan_policy(df_var, nan_decision)
+  #df_var <- .nan_policy(df_var, nan_decision)
 
-  ###Check the number of groups. If < 2 then Wilcox-test is used for
-  ###numerical variables, else anova is used
-  numeric_test <- get_numeric_test(df_var, cohort_col, continous_stat_agg)
+  ###Obtaninig the numeric test
+  numeric_test <- .get_numeric_test(df_var, cohort_col, continous_test)
+
+  cat_test <- .get_categorical_test(df_var, categorical_test)
 
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
-  tab_results <- suppressWarnings(tableby(formula,data=df_var, numeric.test = numeric_test, cat.test = "chisq",
+  tab_results <- suppressWarnings(tableby(formula,data=df_var,
+                                          numeric.test = numeric_test,
+                                          cat.test = cat_test,
                          numeric.stats = cont_agg, total = FALSE,
                          cat.stats=c("countpct"), stats.labels = stats_labels))
 
@@ -207,14 +211,33 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
 
 }
 
-get_stats_labels <- function(labels){
+.get_numeric_test <- function(df_var, cohort_col, continous_test){
+
+  if(continous_test == "auto"){
+    return(.determine_numeric_test(df_var, cohort_col))
+  } else {
+    return(continous_test)
+  }
+
+}
+
+.get_categorical_test <- function(df_var, categorical_test){
+  if(categorical_test == "auto"){
+    return("chisq")
+  } else {
+    return(categorical_test)
+  }
+
+}
+
+.get_stats_labels <- function(labels){
   ##Function that returns the labels that are displayed in the summarized table
   labels_stats <- list(meansd="Mean (SD)", medianIQR = "Median (IQR)")
   return(labels_stats[labels])
 
 }
 
-get_continous_stat_agg <- function(var){
+.get_continous_stat_agg <- function(var){
 
   if(var == "both"){
     stat <- c("meansd", "medianIQR")
@@ -226,7 +249,7 @@ get_continous_stat_agg <- function(var){
   }
 }
 
-get_formula <- function(df_var,cohort_col = NULL ){
+.get_formula <- function(df_var,cohort_col = NULL ){
 
   if(is.null(cohort_col) && (length(which(colnames(df_var) == "COHORT_ASSIGNED")) == 0)){
     formula <- formulize("",".")
@@ -240,7 +263,9 @@ get_formula <- function(df_var,cohort_col = NULL ){
 
 }
 
-get_numeric_test <- function(df_var, cohort_col, continous_stat_agg){
+.determine_numeric_test <- function(df_var, cohort_col){
+  ###Check the number of groups. If < 2 then Wilcox-test is used for
+  ###numerical variables, else anova is used
 
   if(is.null(cohort_col)){
     indexCohortCol <- which(colnames(df_var) == "COHORT_ASSIGNED")
@@ -260,7 +285,7 @@ get_numeric_test <- function(df_var, cohort_col, continous_stat_agg){
   }
 }
 
-demographics_df <- function(cohort){
+.demographics_df <- function(cohort){
   #This function takes in a cohort name and gets the corresponding patient IDs to extract
   ##demographic variables and returns a dataframe ready to use in get_descriptives()
 
@@ -292,28 +317,28 @@ demographics_df <- function(cohort){
   return(df_final)
 }
 
-check_input <- function(user_input){
+.check_input <- function(user_input){
   ##Function that verifies if the input is an
   ##integer, list of integers or dataframe
   ###If the input is integer or list of integer
   ###it will parse them to obtain the demographics dataframe
   if(class(user_input) == "numeric"){
-    return(demographics_df(user_input))
+    return(.demographics_df(user_input))
   } else if (class(user_input) == "data.frame"){
     return(user_input)
   } else if (class(user_input[[1]]) == "numeric"){
-    return(parse_demographic_list(user_input))
+    return(.parse_demographic_list(user_input))
   } else {
     return(user_input)
   }
 }
 
-parse_demographic_list <- function(user_input){
+.parse_demographic_list <- function(user_input){
   ###Function that receives a list of integers (person_id)
   ###Making a Dataframe of demographics for each of them
   final_list <- list()
   for (x in user_input){
-    df_demo <- demographics_df(x)
+    df_demo <- .demographics_df(x)
     final_list  <- c(list(df_demo), final_list)
   }
 
@@ -327,6 +352,8 @@ get_descriptives <- function(list_dataframes,
                              use_cols = NULL,
                              exclude_cols = NULL,
                              continous_stat_agg ="both",
+                             continous_test = "auto",
+                             categorical_test = "auto",
                              dig = 2,
                              csv = F){
 
@@ -343,6 +370,11 @@ get_descriptives <- function(list_dataframes,
   ##should be summarized with the mean (STD), median(IQR), or both in 2 rows.
   ##Possible values:
   ##"mean", "median", "both"
+  ##continous_test: character indicating the test for the cobtinous variables
+  ##possible values: "auto", "anova" , "wt".
+  ##categorical_test: character indicating the test for the cobtinous variables
+  ##possible values: "auto", "chisq" , "fe".
+
   ###nan_decision: String indicating if the user wants to keep NAs or drop them,
   ##Possible values: "keep". Any other string besides from keep will drop NAs
   ###dig: Integer indicating the number of decimal places to be shown.
@@ -350,18 +382,19 @@ get_descriptives <- function(list_dataframes,
   ##the output is in Markdown
 
   ##We first check if the user provided ids of patients or a dataframe
-  df_var <- check_input(list_dataframes)
+  df_var <- .check_input(list_dataframes)
 
 
   ###Next we prepare de dataframe with the use and exclude columns
-  df_var <- iter_prepare_dataframe_cols(df_var,use_cols, exclude_cols)
+  df_var <- .iter_prepare_dataframe_cols(df_var,use_cols, exclude_cols)
 
   ####Next we prepare the dataframe with the cohorts_names
-  df_var <- prepare_dataframe(df_var, cohort_names, cohort_col)
+  df_var <- .prepare_dataframe(df_var, cohort_names, cohort_col)
 
   ###Next we run the stats analysis
 
-  df_var <- run_arsenal(df_var, cohort_col, continous_stat_agg, dig)
+  df_var <- .run_arsenal(df_var, cohort_col, continous_stat_agg, dig,
+                         continous_test, categorical_test)
 
   if( csv == T){
     ###We now format df_var to export it as csv file
