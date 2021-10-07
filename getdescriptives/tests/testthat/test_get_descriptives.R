@@ -7,7 +7,8 @@ export_csv <- function(df){
   return(write.csv(as.data.frame(df), row.names=F))
 }
 
-n_stats <- c("meansd", "median", "iqr")
+n_stats <- c("meansd", "medianIQR")
+labels_stats <- list(meansd="Mean (SD)", medianIQR = "Median (IQR)")
 ##Supress the warnings derived from testing the same tables
 options(warn=-1)
 test_that("Single dataframe with numerical variables", {
@@ -17,7 +18,8 @@ test_that("Single dataframe with numerical variables", {
   var_expected <- summary(tableby(COHORT_ASSIGNED~., data = cars,numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats , total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -31,7 +33,8 @@ test_that("Single dataframe with both numerical and categorical variables", {
   var_expected <- summary(tableby(COHORT_ASSIGNED~., data = plants_df,numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats, total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -45,7 +48,8 @@ test_that("Single dataframe with cohort_col", {
   var_expected <- summary(tableby(group~., data = plants,numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats , total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -58,7 +62,8 @@ test_that("Single dataframe with cohort_col and > 2 cohort groups", {
   var_expected <- summary(tableby(group~., data = PlantGrowth,
                                   cat.test = "chisq",
                                   numeric.stats = n_stats, total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -71,7 +76,8 @@ test_that("Two dataframes with cohort_col", {
   var_expected <- summary(tableby(group~., data = rbind(plants, plants),numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats, total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -89,7 +95,8 @@ test_that("Two dataframes with numerical variables, no cohort names", {
                                                                    mtcars_two),numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats, total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)
@@ -107,7 +114,8 @@ test_that("Two dataframes with numerical variables, cohort names defined", {
                                                                    mtcars_two),numeric.test = "wt",
                                   cat.test = "chisq",
                                   numeric.stats = n_stats , total = FALSE,
-                                  cat.stats=c("countpct")), digits = 2,
+                                  cat.stats=c("countpct"),
+                                  stats.labels = labels_stats), digits = 2,
                           dig.count = 2, dig.pct = 2,
                           dig.p = 2, text=TRUE,
                           pfootnote=TRUE)

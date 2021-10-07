@@ -3,6 +3,32 @@ library(dplyr)
 library(naniar)
 library(NeuroBlu)
 
+# -------------Median IQR-----------#
+#By default, Arsenal doesn't implement the Median (IQR) function.
+#To overcome this, we created the function and then we added
+#it to arsenal namespace
+medianIQR <- function (x, na.rm = TRUE, weights = NULL, ...)
+{
+  y <- if (na.rm && allNA(x)) {
+    NA_real_
+  }
+  else {
+    m <- wtd.quantile(x, weights = weights, probs = c(0.5),
+                      na.rm = na.rm)
+    iqr_a <- diff(wtd.quantile(x, weights = weights,
+                               probs = c(0.25,0.75), na.rm = na.rm))
+    if (is.Date(x))
+      list(as.character(m), as.difftime(s, units = "days"))
+    else c(m, iqr_a)
+  }
+  as.tbstat(y, parens = c("(", ")"))
+}
+
+###We assign the medianIQR function to arsenal
+environment(medianIQR) <- asNamespace('arsenal')
+
+# ---------------------------------#
+
 iter_prepare_dataframe_cols <- function(df_list, use_cols = NULL,
                                         exclude_cols = NULL){
   ####The input of the function is:
@@ -158,6 +184,9 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
 
   cont_agg <- get_continous_stat_agg(continous_stat_agg)
 
+  ##Obtain the labels of the stats
+  stats_labels <- get_stats_labels(cont_agg)
+
   #Make decision on what to do with missing values
   #df_var <- nan_policy(df_var, nan_decision)
 
@@ -168,7 +197,7 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
   tab_results <- tableby(formula,data=df_var, numeric.test = numeric_test, cat.test = "chisq",
                          numeric.stats = cont_agg, total = FALSE,
-                         cat.stats=c("countpct"))
+                         cat.stats=c("countpct"), stats.labels = stats_labels)
 
 
   output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2,
@@ -178,15 +207,22 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
 
 }
 
+get_stats_labels <- function(labels){
+  ##Function that returns the labels that are displayed in the summarized table
+  labels_stats <- list(meansd="Mean (SD)", medianIQR = "Median (IQR)")
+  return(labels_stats[labels])
+
+}
+
 get_continous_stat_agg <- function(var){
 
-  if(var == "all"){
-    stat <- c("meansd", "median", "iqr")
+  if(var == "both"){
+    stat <- c("meansd", "medianIQR")
     return(stat)
   } else if (var == "mean") {
     return("meansd")
-  } else {
-    return(var)
+  } else if (var == "median"){
+    return("medianIQR")
   }
 }
 
@@ -290,7 +326,7 @@ get_descriptives <- function(list_dataframes,
                              cohort_names = NULL,
                              use_cols = NULL,
                              exclude_cols = NULL,
-                             continous_stat_agg ="all",
+                             continous_stat_agg ="both",
                              dig = 2,
                              csv = F){
 
@@ -304,7 +340,8 @@ get_descriptives <- function(list_dataframes,
   ###excludecols: character vector indicating the names of the columns to be
   ###excluded
   ##continuous_stat_agg: character indicating in the continous variables
-  ##should be summarized with the mean, median(IQR), or both. Possible values:
+  ##should be summarized with the mean (STD), median(IQR), or both in 2 rows.
+  ##Possible values:
   ##"mean", "median", "both"
   ###nan_decision: String indicating if the user wants to keep NAs or drop them,
   ##Possible values: "keep". Any other string besides from keep will drop NAs
