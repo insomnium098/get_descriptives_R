@@ -41,7 +41,7 @@ possible values: "auto", "chisq" , "fe".}
 \item{csv}{csv: Boolean, indicating if the output should be a CSV. By default
 the output is in Markdown}
 
-\item{continuous_stat_agg}{haracter indicating in the continous variables
+\item{continuous_stat_agg}{character indicating in the continous variables
 should be summarized with the Mean (STD), Median (IQR), or both in 2 rows.
 Possible values: "mean", "median", "both"}
 }

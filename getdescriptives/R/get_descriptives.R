@@ -218,6 +218,7 @@ environment(medianIQR) <- asNamespace('arsenal')
 }
 
 .get_categorical_test <- function(df_var, categorical_test){
+
   if(categorical_test == "auto"){
     return("chisq")
   } else {
@@ -282,8 +283,9 @@ environment(medianIQR) <- asNamespace('arsenal')
 }
 
 .demographics_df <- function(cohort){
-  # This function takes in a cohort name and gets the corresponding patient IDs to extract
-  # demographic variables and returns a dataframe ready to use in get_descriptives()
+  # This function takes in a cohort name and gets the corresponding patient IDs
+  # to extract demographic variables and returns a dataframe ready to use in
+  # get_descriptives()
 
   # Extract demographic variables
   birth_year = getBirthYear(cohort) #Birth year
@@ -297,7 +299,8 @@ environment(medianIQR) <- asNamespace('arsenal')
   state = getState(cohort) #State
 
   # List of variables to merge
-  demographics <- list(birth_year, gender, city, education_years, employment, ethnicity,
+  demographics <- list(birth_year, gender, city, education_years,
+                       employment, ethnicity,
                        marital, race, state)
 
   # Merge all remaining variables
@@ -349,7 +352,7 @@ environment(medianIQR) <- asNamespace('arsenal')
 #' @param cohort_names character vector indicating the names of the cohorts
 #' @param use_cols character vector indicating the names of the columns to be used
 #' @param exclude_cols character vector indicating the names of the columns to be excluded
-#' @param continuous_stat_agg haracter indicating in the continous variables
+#' @param continuous_stat_agg character indicating in the continous variables
 #' should be summarized with the Mean (STD), Median (IQR), or both in 2 rows.
 #' Possible values: "mean", "median", "both"
 #' @param continous_test character indicating the test for the continous variables
@@ -391,7 +394,7 @@ get_descriptives <- function(list_dataframes,
   df_var <- .run_arsenal(df_var, cohort_col, continous_stat_agg, dig,
                          continous_test, categorical_test)
 
-  if( csv == T){
+  if( csv == T) {
     # We now format df_var to export it as csv file
     df_var <- as.data.frame(df_var)
     df_var <- write.csv(df_var, row.names=F)
