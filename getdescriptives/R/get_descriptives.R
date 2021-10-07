@@ -195,9 +195,9 @@ run_arsenal <- function(df_var, cohort_col = NULL, continous_stat_agg, dig){
   numeric_test <- get_numeric_test(df_var, cohort_col, continous_stat_agg)
 
   ##WT stands for Wilcoxon-test(alias Mann-Whitney)
-  tab_results <- tableby(formula,data=df_var, numeric.test = numeric_test, cat.test = "chisq",
+  tab_results <- suppressWarnings(tableby(formula,data=df_var, numeric.test = numeric_test, cat.test = "chisq",
                          numeric.stats = cont_agg, total = FALSE,
-                         cat.stats=c("countpct"), stats.labels = stats_labels)
+                         cat.stats=c("countpct"), stats.labels = stats_labels))
 
 
   output <- summary(tab_results, digits = dig, dig.count = 2, dig.pct = 2,
