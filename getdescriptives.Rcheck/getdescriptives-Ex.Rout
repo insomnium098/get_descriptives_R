@@ -1,29 +1,60 @@
-#  R version of get_descriptives for NeuroBlu
 
-### General Info
-***
-This package mimics the python version of get_descriptives of NeuroBlu.
-It receives a single dataframe or a list of dataframes and generates 
-a table with the descriptive stats of the variables.
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-apple-darwin17.0 (64-bit)
 
-Continuous are compared between cohorts using Mann-Whitney U test while
-Categorical and ordinal variables with Chi-squared test.
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
 
-### Installation
+  Natural language support but running in an English locale
 
-```
-devtools::install_github("insomnium098/get_descriptives_R/getdescriptives")
-```
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
 
-### Example
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
 
-#### Single cohort
+> pkgname <- "getdescriptives"
+> source(file.path(R.home("share"), "R", "examples-header.R"))
+> options(warn = 1)
+> library('getdescriptives')
+Loading required package: arsenal
+Loading required package: dplyr
 
-```
-get_descriptives(mtcars)
-```
+Attaching package: ‘dplyr’
 
-```
+The following objects are masked from ‘package:stats’:
+
+    filter, lag
+
+The following objects are masked from ‘package:base’:
+
+    intersect, setdiff, setequal, union
+
+Loading required package: naniar
+Loading required package: NeuroBlu
+> 
+> base::assign(".oldSearch", base::search(), pos = 'CheckExEnv')
+> base::assign(".old_wd", base::getwd(), pos = 'CheckExEnv')
+> cleanEx()
+> nameEx("get_descriptives")
+> ### * get_descriptives
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: get_descriptives
+> ### Title: Function to obtain descriptive statistics of a given list of
+> ###   dataframes or patients.
+> ### Aliases: get_descriptives
+> 
+> ### ** Examples
+> 
+> get_descriptives(mtcars)
+Warning: UserWarning: Name of the cohort column is not specified.
+            The data is assumed to be from a single cohort
 
 
 |                | Cohort-1 (N=32) |
@@ -62,46 +93,9 @@ get_descriptives(mtcars)
 |-  Mean (SD)    |   2.81 (1.62)   |
 |-  Median (IQR) |   2.00 (2.00)   |
 
-
-```
-
-```
-data("PlantGrowth")
-get_descriptives(PlantGrowth)
-```
-
-```
-|                | Cohort-1 (N=30) |
-|:---------------|:---------------:|
-|weight          |                 |
-|-  Mean (SD)    |   5.07 (0.70)   |
-|-  Median (IQR) |   5.15 (0.98)   |
-|group           |                 |
-|-  ctrl         |   10 (33.3%)    |
-|-  trt1         |   10 (33.3%)    |
-|-  trt2         |   10 (33.3%)    |
-```
-#### Single cohort, > 2 groups
-```
-get_descriptives(PlantGrowth, cohort_col = "group")
-```
-
-```
-|                | ctrl (N=10) | trt1 (N=10) | trt2 (N=10) |   p value|
-|:---------------|:-----------:|:-----------:|:-----------:|---------:|
-|weight          |             |             |             | 0.016 (1)|
-|-  Mean (SD)    | 5.03 (0.58) | 4.66 (0.79) | 5.53 (0.44) |          |
-|-  Median (IQR) | 5.15 (0.74) | 4.55 (0.66) | 5.44 (0.47) |          |
-1. Linear Model ANOVA
-```
-
-#### Two cohorts
+> get_descriptives(list(list(mtcars[1:10,]), mtcars[11:20,]))
 
 
-```
-get_descriptives(list(list(mtcars[1:10,]), mtcars[11:20,]))
-```
-```
 |                | Cohort-1 (N=10) | Cohort-2 (N=10) |   p value|
 |:---------------|:---------------:|:---------------:|---------:|
 |mpg             |                 |                 | 0.256 (1)|
@@ -138,22 +132,22 @@ get_descriptives(list(list(mtcars[1:10,]), mtcars[11:20,]))
 |-  Mean (SD)    |   2.90 (1.20)   |   2.50 (1.35)   |          |
 |-  Median (IQR) |   3.00 (1.75)   |   2.00 (2.75)   |          |
 1. Wilcoxon rank sum test
-```
 
-```
-get_descriptives(list(list(PlantGrowth), PlantGrowth), cohort_names = c("plant1", "plant2"))
-```
-
-```
-|                | plant1 (N=30) | plant2 (N=30) |   p value|
-|:---------------|:-------------:|:-------------:|---------:|
-|weight          |               |               | 1.000 (1)|
-|-  Mean (SD)    |  5.07 (0.70)  |  5.07 (0.70)  |          |
-|-  Median (IQR) |  5.15 (0.98)  |  5.15 (0.98)  |          |
-|group           |               |               | 1.000 (2)|
-|-  ctrl         |  10 (33.3%)   |  10 (33.3%)   |          |
-|-  trt1         |  10 (33.3%)   |  10 (33.3%)   |          |
-|-  trt2         |  10 (33.3%)   |  10 (33.3%)   |          |
-1. Wilcoxon rank sum test
-2. Pearson's Chi-squared test
-```
+> 
+> 
+> 
+> cleanEx()
+> nameEx("hello")
+> ### * hello
+> 
+> flush(stderr()); flush(stdout())
+> 
+> ### Name: hello
+> ### Title: Hello, World!
+> ### Aliases: hello
+> 
+> ### ** Examples
+> 
+> hello()
+Error in hello() : could not find function "hello"
+Execution halted

@@ -1,0 +1,3 @@
+get_descriptives        Function to obtain descriptive statistics of a
+                        given list of dataframes or patients.
+hello                   Hello, World!
