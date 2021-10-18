@@ -1,11 +1,7 @@
 library(dplyr)
 data("PlantGrowth")
 
-##Function to export as csv
-
-export_csv <- function(df){
-  return(write.csv(as.data.frame(df), row.names=F))
-}
+source("../../R/get_descriptives.R")
 
 n_stats <- c("meansd", "medianIQR")
 labels_stats <- list(meansd="Mean (SD)", medianIQR = "Median (IQR)")
