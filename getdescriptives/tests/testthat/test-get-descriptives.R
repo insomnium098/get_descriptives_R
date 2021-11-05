@@ -5,6 +5,7 @@ source("../../R/get-descriptives.R")
 
 nStats <- c("meansd", "medianIQR")
 labelsStats <- list(meansd = "Mean (SD)", medianIQR = "Median (IQR)")
+ordinalTest <- "wtOrdinal"
 
 # Supress the warnings derived from testing the same tables
 options(warn = -1)
@@ -14,7 +15,7 @@ test_that("Single dataframe with numerical variables", {
   cars <- mtcars
   cars$COHORT_ASSIGNED <- "Cohort-1"
   varExpected <- summary(tableby(COHORT_ASSIGNED~., data = cars, numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq", ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -29,7 +30,7 @@ test_that("Single dataframe with both numerical and categorical variables", {
   plantsDf <- PlantGrowth
   plantsDf$COHORT_ASSIGNED <- "Cohort-1"
   varExpected <- summary(tableby(COHORT_ASSIGNED~., data = plantsDf, numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -44,7 +45,7 @@ test_that("Single dataframe with cohortCol", {
   plants <- filter(PlantGrowth, group %in% c("trt1", "trt2"))
   varOutput <- generateDescriptives(plants, cohortCol = "group")
   varExpected <- summary(tableby(group~., data = plants, numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -58,7 +59,7 @@ test_that("Single dataframe with cohortCol and > 2 cohort groups", {
 
   varOutput <- generateDescriptives(PlantGrowth, cohortCol = "group")
   varExpected <- summary(tableby(group~., data = PlantGrowth,
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = "kwt",
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -72,7 +73,7 @@ test_that("Two dataframes with cohortCol", {
   plants <- filter(PlantGrowth, group %in% c("trt1", "trt2"))
   varOutput <- generateDescriptives(list(list(plants), plants), cohortCol = "group")
   varExpected <- summary(tableby(group~., data = rbind(plants, plants), numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -91,7 +92,7 @@ test_that("Two dataframes with numerical variables, no cohort names", {
   varOutput <- generateDescriptives(list(list(mtcars), mtcars))
   varExpected <- summary(tableby(COHORT_ASSIGNED ~., data = rbind(mtcarsOne,
                                                                   mtcarsTwo), numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -110,7 +111,7 @@ test_that("Two dataframes with numerical variables, cohort names defined", {
   varOutput <- generateDescriptives(list(list(mtcars), mtcars), cohortNames = c("Test1", "Test2"))
   varExpected <- summary(tableby(COHORT_ASSIGNED ~., data = rbind(mtcarsOne,
                                                                   mtcarsTwo), numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats, total = FALSE,
                                  cat.stats = c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -127,7 +128,7 @@ test_that("Single list of patient ids", {
   patientsDfFiltered <- subset(patientsDf, select = columnsFilter)
   patientsDfFiltered$COHORT_ASSIGNED <- "Cohort-1"
   varExpected <- summary(tableby(COHORT_ASSIGNED~., data = patientsDfFiltered,numeric.test = "wt",
-                                 cat.test = "chisq",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
                                  numeric.stats = nStats , total = FALSE,
                                  cat.stats=c("countpct"),
                                  stats.labels = labelsStats), digits = 2,
@@ -278,6 +279,62 @@ test_that(".getFormula", {
                    c("~", "COHORT_ASSIGNED", "."))
 
 })
+
+test_that(".checkColumnExist", {
+
+  expect_identical(.checkColumnExist(mtcars, "mpg"),
+                   TRUE)
+  expect_identical(.checkColumnExist(mtcars, "abcdfg"),
+                   FALSE)
+
+
+})
+
+test_that(".getColumnIndex", {
+
+  expect_identical(.getColumnIndex(mtcars, "mpg"),
+                   as.integer(1))
+  expect_identical(.getColumnIndex(mtcars, "cyl"),
+                   as.integer(2))
+
+})
+
+test_that(".prepareColumnTypes", {
+  mcars_1 <- mtcars
+  mcars_2 <- mtcars
+
+  mpg.ordinal_type <- build_ordinal_type(mcars_1$mpg)
+  mcars_1$mpg <- mpg.ordinal_type
+
+  list_types <- list("mpg" = mpg.ordinal_type)
+  df_prepared <- .prepareColumnTypes(mcars_2, list_types)
+
+  expect_identical(df_prepared,mcars_1)
+
+})
+
+test_that("Ordinal variables, 2 groups", {
+  test <- subset(mockstudy, select = c(sex, age))
+  test$age.ordnew <- ordered(test$age)
+  list_types <- list("age" = test$age.ordnew)
+
+  varOutput <- generateDescriptives(test, cohortCol = "sex", excludeCols = "age",
+                                    column_types = list_types)
+  varExpected <- summary(tableby(sex ~ age.ordnew, data = test, numeric.test = "wt",
+                                 cat.test = "chisq",ordered.test = ordinalTest,
+                                 numeric.stats = nStats, total = FALSE,
+                                 cat.stats = c("countpct"),
+                                 stats.labels = labelsStats), digits = 2,
+                         dig.count = 2, dig.pct = 2,
+                         dig.p = 2, text = TRUE,
+                         pfootnote = TRUE)
+  expect_identical(varExpected, varOutput)
+
+})
+
+
+
+
 
 
 
