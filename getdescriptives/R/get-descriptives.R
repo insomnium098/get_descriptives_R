@@ -22,10 +22,31 @@ medianIQR <- function(x, na.rm = TRUE, weights = NULL, ...) {
 # We assign the medianIQR function to arsenal
 environment(medianIQR) <- asNamespace("arsenal")
 
+# Modifying also the wilcoxon test (Mann whitney) so it can support ordinal variables
+# The original wilcoxon test needs the values to be as.numerical(), however in the ordinal
+# variables, the values are as.factor. We added a line to convert the values
+# to as.numerical() before testing
+wtOrdinal <- function(x, x.by, ..., wilcox.correct = FALSE, wilcox.exact = NULL, test.always = FALSE) {
+  x <- as.numeric(x)
+  tab <- table(is.na(x), x.by)
+  if(ncol(tab) != 2) stop("The Wilcoxon Rank Sum test must have exactly two groups")
+
+  if(!test.always && (any(tab[1, ] == 0) || any(colSums(tab) == 0))) {
+    return(list(p.value=NA_real_, statistic.F=NA_real_, method="Wilcoxon rank sum test"))
+  }
+
+  stats::wilcox.test(x ~ as.factor(x.by), correct = wilcox.correct, exact = wilcox.exact)
+}
+
+environment(wtOrdinal) <- asNamespace("arsenal")
+assignInNamespace("wt", wtOrdinal, ns = "arsenal")
+
+
 # ---------------------------------#
 
 .iterPrepareDataframeCols <- function(dfList, useCols = NULL,
-                                      excludeCols = NULL) {
+                                      excludeCols = NULL,
+                                      cohortCol = NULL) {
   # The input of the function is:
   # dfList : A list of dataframes
   # useCols: vector of characters, name of columns to use
@@ -43,11 +64,11 @@ environment(medianIQR) <- asNamespace("arsenal")
 
   # Case when its a single dataframe
   if (class(dfList) == "data.frame") {
-    r <- .prepareDataframeCols(dfList, useCols, excludeCols)
+    r <- .prepareDataframeCols(dfList, useCols, excludeCols, cohortCol)
   } else {
     for (i in 1:length(dfList)) {
       dfI <- as.data.frame(dfList[i])
-      dfPrepared <- .prepareDataframeCols(dfI, useCols, excludeCols)
+      dfPrepared <- .prepareDataframeCols(dfI, useCols, excludeCols, cohortCol)
       r <- c(list(dfPrepared), r)
     }
 
@@ -59,7 +80,8 @@ environment(medianIQR) <- asNamespace("arsenal")
 }
 
 
-.prepareDataframeCols <- function(dfVar, useCols = NULL, excludeCols = NULL) {
+.prepareDataframeCols <- function(dfVar, useCols = NULL, excludeCols = NULL,
+                                  cohortCol = NULL) {
   # """Excludes/Includes required columns in the dataset"""
   if (is.null(useCols)) {
     if (is.null(excludeCols)) {
@@ -68,7 +90,13 @@ environment(medianIQR) <- asNamespace("arsenal")
       return(dfVar[, !(colnames(dfVar) %in% excludeCols)])
     }
   } else if (is.null(excludeCols)) {
-    return(dfVar[, (colnames(dfVar) %in% useCols)])
+    if(is.null(cohortCol)){
+      return(dfVar[, (colnames(dfVar) %in% useCols)])
+    } else {
+      return(dfVar[, (colnames(dfVar) %in%
+                        c(useCols,cohortCol ))])
+    }
+
   } else {
     stop("ValueError: Both useCols and excludeCols cannot take values")
   }
@@ -184,10 +212,14 @@ environment(medianIQR) <- asNamespace("arsenal")
 
   catTest <- .getCategoricalTest(dfVar, categoricalTest)
 
+  ordinalTest <- .getOrdinalTest(numericTest)
+
+
   # WT stands for Wilcoxon-test(alias Mann-Whitney)
   tabResults <- suppressWarnings(arsenal::tableby(formula,data = dfVar,
                                                   numeric.test = numericTest,
                                                   cat.test = catTest,
+                                                  ordered.test = ordinalTest,
                                                   numeric.stats = contAgg, total = FALSE,
                                                   cat.stats = c("countpct"), stats.labels = statsLabels))
 
@@ -216,6 +248,17 @@ environment(medianIQR) <- asNamespace("arsenal")
   } else {
     return(categoricalTest)
   }
+
+}
+
+.getOrdinalTest <- function(numericTest){
+
+  if(numericTest == "wt"){
+    return("wtOrdinal")
+  } else {
+    return("kwt")
+  }
+
 
 }
 
@@ -336,6 +379,63 @@ environment(medianIQR) <- asNamespace("arsenal")
   return(finalList)
 }
 
+.checkColumnExist <- function(dfVar, column_name){
+  # Function that checks if a column name exists in a dataframe
+  # Returns a boolean
+  var_exists <- grep(column_name, colnames(dfVar))
+  if(length(var_exists) == 0){
+    return(FALSE)
+  } else {
+    return(TRUE)
+  }
+}
+
+.getColumnIndex <- function(dfVar, column_name){
+  # Function that returns the index of a column name
+  # Returns the index of the column
+  var_exists <- grep(column_name, colnames(dfVar))
+  return(var_exists)
+}
+
+
+
+.prepareColumnTypes <- function(dfVar, column_types){
+  # Function that prepares the columns as the column_types specified
+  if(is.null(column_types)){
+    return(dfVar)
+  }
+
+  for (i in 1:length(column_types)){
+    # Check if the column exists
+    if(.checkColumnExist(dfVar, names(column_types)[i])){
+      # Get the index of the column in the df
+      index_col <- .getColumnIndex(dfVar, names(column_types)[i])
+      # get the values of the list
+      val_list <- column_types[i]
+      # replace the values in the columns
+      dfVar[,index_col] <- val_list
+    }
+
+    return(dfVar)
+
+  }
+
+
+}
+
+#' Build an ordinal type.
+#'
+#' @description
+#' This function returns a column of a dataframe as an ordered factor (ordinal)
+#' @param df_column A vector such as the column of a dataframe
+#' @return A vector as an ordered factor
+#' @examples
+#' build_ordinal_type(mtcars$mpg)
+#' @export
+build_ordinal_type <- function(df_column){
+  return(ordered(df_column))
+}
+
 #' Generates descriptive table for the specified list of dataframes.
 #'
 #' @description
@@ -347,6 +447,7 @@ environment(medianIQR) <- asNamespace("arsenal")
 #' @param cohortNames character vector indicating the names of the cohorts
 #' @param useCols character vector indicating the names of the columns to be used
 #' @param excludeCols character vector indicating the names of the columns to be excluded
+#' @param column_types List indicating the names of the columns and the type of the variables
 #' @param continuousStatAgg character indicating in the continous variables
 #' to be summarized with the Mean (SD), Median (IQR), or both in consecutive rows.
 #' Possible values: "mean", "median", "both"
@@ -362,6 +463,13 @@ environment(medianIQR) <- asNamespace("arsenal")
 #' library(NeuroBlu)
 #' library(survival)
 #' generateDescriptives(diabetic, cohortCol = "trt", useCols = c("age", "eye", "risk", "time", "trt"), csv = T)
+#'
+#' For ordinal variables:
+#'
+#'test <- subset(mockstudy, select = c(sex, age))
+#'age_ordinal <- build_ordinal_type(test$age)
+#'list_types <- list("age" = age_ordinal)
+#'generateDescriptives(test, cohortCol = "sex",column_types = list_types)
 #' @export
 
 generateDescriptives <- function(listDataframes,
@@ -369,6 +477,7 @@ generateDescriptives <- function(listDataframes,
                                  cohortNames = NULL,
                                  useCols = NULL,
                                  excludeCols = NULL,
+                                 column_types = NULL,
                                  continousStatAgg ="both",
                                  continousTest = "auto",
                                  categoricalTest = "auto",
@@ -381,10 +490,13 @@ generateDescriptives <- function(listDataframes,
 
 
   # Next we prepare de dataframe with the use and exclude columns
-  dfVar <- .iterPrepareDataframeCols(dfVar, useCols, excludeCols)
+  dfVar <- .iterPrepareDataframeCols(dfVar, useCols, excludeCols, cohortCol)
 
   # Next we prepare the dataframe with the cohortsNames
   dfVar <- .prepareDataframe(dfVar, cohortNames, cohortCol)
+
+  # Process the column types
+  dfVar <- .prepareColumnTypes(dfVar, column_types)
 
   # Next we run the stats analysis
 
