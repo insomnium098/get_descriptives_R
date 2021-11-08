@@ -170,31 +170,6 @@ assignInNamespace("wt", wtOrdinal, ns = "arsenal")
   return(finalDF)
 }
 
-# Define .nanPolicy function
-.nanPolicy <- function(dfVar, nanDecision) {
-
-  # Write out all the strings associated with missing values
-  naStrings <- c("NA", "N A", "N / A", "N/A", "N/ A", "Not Available",
-                 "NOt available", "UNKNOWN", "Unknown")
-
-  # Replace all naStrings for NAs
-  dfVar <- as.data.frame(replace_with_na_all(data = dfVar, condition = ~.x %in%
-                                               c("NA", "N A", "N / A", "N/A",
-                                                 "N/ A", "Not Available",
-                                                 "NOt available", "UNKNOWN",
-                                                 "Unknown")))
-
-  # Make decision on what to do with missing values
-  if (nanDecision == 'keep') {
-    dfVar <- dfVar
-  } else {
-    print("Dropping all rows that contain missing values")
-    dfVar <- na.omit(dfVar)
-    dfVar
-  }
-  return(dfVar)
-}
-
 
 .runArsenal <- function(dfVar, cohortCol = NULL, continousStatAgg, dig,
                         continousTest, categoricalTest) {
