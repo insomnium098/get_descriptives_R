@@ -144,6 +144,10 @@ test_that("CheckInput single dataframe", {
   expect_identical(.checkInput(PlantGrowth), PlantGrowth)
 })
 
+test_that("CheckInput single dataframe as tibble", {
+  expect_identical(.checkInput(starwars), as.data.frame(starwars))
+})
+
 test_that("iterPrepareDataframeCols single dataframe no params", {
   expect_identical(.iterPrepareDataframeCols(PlantGrowth), PlantGrowth)
 })
