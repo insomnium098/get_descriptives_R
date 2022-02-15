@@ -339,7 +339,7 @@ assignInNamespace("wt", wtOrdinal, ns = "arsenal")
     return(as.data.frame(userInput))
   } else if ('tbl'  %in% class(userInput)) {
     return(as.data.frame(userInput))
-  } else if ('data.frame'  %in% class(starwars)) {
+  } else if ('data.frame'  %in% class(userInput)) {
     return(userInput)
   } else if (class(userInput[[1]]) == "numeric") {
     return(.parseDemographicList(userInput))
