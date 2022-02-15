@@ -129,6 +129,8 @@ assignInNamespace("wt", wtOrdinal, ns = "arsenal")
     listDataframes <- list(listDataframes)
   }
 
+  listDataframes <- rev(listDataframes)
+
   if (is.null(cohortsNames)) {
     cohortsNames <- .getDefaultNames(length(listDataframes))
   }
@@ -333,7 +335,11 @@ assignInNamespace("wt", wtOrdinal, ns = "arsenal")
   # it will parse them to obtain the demographics dataframe
   if (class(userInput) == "numeric") {
     return(.demographicsDf(userInput))
-  } else if (class(userInput) == "data.frame") {
+  } else if ('tbl_df' %in% class(userInput)) {
+    return(as.data.frame(userInput))
+  } else if ('tbl'  %in% class(userInput)) {
+    return(as.data.frame(userInput))
+  } else if ('data.frame'  %in% class(starwars)) {
     return(userInput)
   } else if (class(userInput[[1]]) == "numeric") {
     return(.parseDemographicList(userInput))
